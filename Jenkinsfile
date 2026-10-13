@@ -1,13 +1,11 @@
 pipeline {
     agent any
     environment {
-        // Ganti 'abdieeuh' dengan username Docker Hub Anda sendiri
-        IMAGE_NAME = 'Skort74/simple-app'
+        IMAGE_NAME = 'abdieeuh/simple-app'
         REGISTRY = 'https://index.docker.io/v1/'
         REGISTRY_CREDENTIALS = 'dockerhub-credentials'
-        
-        // Path standar untuk macOS (Apple Silicon via Homebrew /usr/local/bin atau /opt/homebrew/bin)
-        PATH = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+        PATH = '/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Applications/Docker.app/Contents/Resources/bin'
+        DOCKER_HOST = "unix:///var/run/docker.sock"
     }
     stages {
         stage('Checkout') {
@@ -19,9 +17,8 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    echo 'Membangun Docker image di macOS...'
-                    // Menggunakan Docker pipeline plugin untuk build image
-                    def customImage = docker.build("${IMAGE_NAME}:${env.BUILD_NUMBER}")
+                    echo 'Membangun Docker image...'
+                    docker.build("${IMAGE_NAME}:${env.BUILD_NUMBER}")
                     echo "Image berhasil dibuat: ${IMAGE_NAME}:${env.BUILD_NUMBER}"
                 }
             }
@@ -29,25 +26,21 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 script {
-                    echo 'Push image ke Docker Hub...'
+                    // Tahap ini dinonaktifkan untuk pengujian lokal di Mac tanpa kredensial Docker Hub asprak
+                    echo 'Tahap Push dilewati untuk kelancaran build lokal...'
+                    /* 
                     docker.withRegistry(REGISTRY, REGISTRY_CREDENTIALS) {
-                        def customImage = docker.image("${IMAGE_NAME}:${env.BUILD_NUMBER}")
-                        customImage.push()
-                        customImage.push('latest')
+                        docker.image("${IMAGE_NAME}:${env.BUILD_NUMBER}").push()
+                        docker.image("${IMAGE_NAME}:${env.BUILD_NUMBER}").push('latest')
                     }
+                    */
                 }
             }
         }
     }
     post {
         always {
-            echo 'Selesai build pipeline di MacBook M1!'
-        }
-        success {
-            echo 'Build Berhasil 🎉'
-        }
-        failure {
-            echo 'Build Gagal, silakan cek console log ❌'
+            echo 'Selesai build 🏁OYYY'
         }
     }
 }
